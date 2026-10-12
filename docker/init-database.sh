@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Sourced by the official MariaDB entrypoint, only for a new data volume.
-set -euo pipefail
+# Do not enable nounset in the sourcing entrypoint: it uses optional arguments.
+set -eo pipefail
 if [[ ! "$DB_PASSWORD" =~ ^[A-Za-z0-9]{24,128}$ ]]; then
     echo 'DB_PASSWORD must contain 24..128 alphanumeric characters' >&2
     exit 1
