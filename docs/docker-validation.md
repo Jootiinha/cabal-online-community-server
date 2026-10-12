@@ -13,3 +13,8 @@ Executado nesta máquina Windows com Ubuntu-24.04 WSL2 e Docker Engine 29.6.1 / 
 - Banco nativo e backup preservados para recuperação. Credenciais do jogador preservadas.
 
 Healthchecks dos servidores verificam portas em escuta. O smoke test acrescenta consulta SQL e conexão às portas publicadas. Login completo e jogabilidade no cliente não foram testados nesta migração.
+
+
+## Correcao para Docker Desktop
+
+Os wrappers PowerShell agora usam o cliente Windows e o contexto desktop-linux. Banco transferido diretamente em memoria, sem criar novo backup. Todas as contagens conferidas: uma conta e zero personagens. Containers de origem removidos, volume original preservado. Quatro containers saudaveis no Docker Desktop e portas 38101/38111 verificadas pelo Windows. TLS automatico do banco local desabilitado para contornar erro de validade de certificado na VM.

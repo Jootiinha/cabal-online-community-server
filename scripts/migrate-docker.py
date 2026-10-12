@@ -12,7 +12,7 @@ with os.fdopen(fd, 'wb') as output:
 atexit.register(lambda: os.unlink(config))
 legacy = ['mariadb', '--defaults-extra-file=' + config, '-N']
 target = ['docker', 'compose', 'exec', '-T', 'database', 'sh', '-c',
-          'MYSQL_PWD="$MARIADB_ROOT_PASSWORD" exec mariadb -uroot "$@"', '--', '-N']
+          'MYSQL_PWD="$MARIADB_ROOT_PASSWORD" exec mariadb --skip-ssl -uroot "$@"', '--', '-N']
 
 def query(command, sql):
     return subprocess.check_output(command, input=sql.encode()).decode().strip()

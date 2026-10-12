@@ -25,7 +25,7 @@ PY
 }
 compose() { docker compose "$@"; }
 db() {
-  compose exec -T database sh -c 'MYSQL_PWD="$MARIADB_ROOT_PASSWORD" exec mariadb -uroot "$@"' -- "$@"
+  compose exec -T database sh -c 'MYSQL_PWD="$MARIADB_ROOT_PASSWORD" exec mariadb --skip-ssl -uroot "$@"' -- "$@"
 }
 case "$action" in
   init) init_env ;;
@@ -34,6 +34,7 @@ case "$action" in
   down) compose down ;;
   status) compose ps ;;
   logs) compose logs --tail=100 ;;
+  logs-follow) compose logs --follow --tail=100 ;;
   smoke-test)
     compose ps
     for service in database masterserver loginserver gameserver; do
@@ -54,7 +55,7 @@ PY
     umask 077
     mkdir -p .runtime/backups
     target=".runtime/backups/docker-$(date +%Y%m%d-%H%M%S).sql"
-    compose exec -T database sh -c 'MYSQL_PWD="$MARIADB_ROOT_PASSWORD" exec mariadb-dump -uroot --single-transaction --databases cabal_login cabal_world' > "$target.tmp"
+    compose exec -T database sh -c 'MYSQL_PWD="$MARIADB_ROOT_PASSWORD" exec mariadb-dump --skip-ssl -uroot --single-transaction --databases cabal_login cabal_world' > "$target.tmp"
     mv "$target.tmp" "$target"
     echo "Backup: $target"
     ;;
