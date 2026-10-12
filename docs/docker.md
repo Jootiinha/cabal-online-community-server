@@ -50,6 +50,6 @@ docker compose up -d --wait
 bash scripts/docker-local.sh smoke-test
 ```
 
-Os dumps substituem tabelas; escolha o backup correto antes de restaurar. Logs ficam disponíveis por `docker compose logs` e têm rotação nos containers Go. Healthchecks verificam prontidão do MariaDB e conexão TCP nos servidores; não validam um login completo no cliente.
+Os dumps substituem tabelas; escolha o backup correto antes de restaurar. Logs ficam disponíveis por `docker compose logs` e têm rotação nos containers Go. Healthchecks verificam prontidão do MariaDB e portas TCP em escuta nos servidores sem gerar sessões incompletas; não validam um login completo no cliente.
 
 `docker.ps1 test` executa a suíte Go em container. Os scripts nativos antigos continuam disponíveis para rollback e consulta histórica. A inicialização ordenada usa [dependências saudáveis do Compose](https://docs.docker.com/compose/how-tos/startup-order) e o [healthcheck oficial MariaDB](https://mariadb.com/docs/server/server-management/automated-mariadb-deployment-and-administration/docker-and-mariadb/using-healthcheck-sh).

@@ -5,3 +5,4 @@ emulator/bin/
 emulator/log/
 *.exe
 .client/
+__pycache__/

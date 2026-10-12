@@ -2,7 +2,6 @@ name: cabal-local
 
 x-backend: &backend
   image: cabal-backend:local
-  build: .
   restart: unless-stopped
   init: true
   environment: &backend-env
@@ -34,6 +33,7 @@ services:
 
   masterserver:
     <<: *backend
+    build: .
     command: [masterserver]
     environment:
       <<: *backend-env

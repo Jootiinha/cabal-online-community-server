@@ -17,3 +17,16 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y mariadb-server mariadb-client
       - run: sudo service mariadb start
       - run: sudo env PATH="$PATH" bash scripts/integration-test.sh
+  docker:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/docker-local.sh up
+      - run: bash scripts/docker-local.sh smoke-test
+      - run: bash scripts/docker-local.sh create-local-account
+      - run: bash scripts/docker-local.sh backup
+      - run: bash scripts/docker-local.sh test
+      - if: failure()
+        run: docker compose logs --tail=100
+      - if: always()
+        run: docker compose down -v
