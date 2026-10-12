@@ -1,0 +1,9 @@
+*
+!emulator/
+!emulator/**
+!docker/
+!docker/**
+emulator/bin/
+emulator/log/
+emulator/.git/
+**/*_test.go

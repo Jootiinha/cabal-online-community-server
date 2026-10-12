@@ -1,0 +1,7 @@
+.upstream-freya/
+.env
+.runtime/
+emulator/bin/
+emulator/log/
+*.exe
+.client/

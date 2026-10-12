@@ -1,0 +1,99 @@
+name: cabal-local
+
+x-backend: &backend
+  image: cabal-backend:local
+  build: .
+  restart: unless-stopped
+  init: true
+  environment: &backend-env
+    CABAL_BIND_IP: 0.0.0.0
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: '3'
+
+services:
+  database:
+    image: cabal-database:local
+    build:
+      context: .
+      dockerfile: docker/database.Dockerfile
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Run scripts/docker.ps1 init first}
+      DB_PASSWORD: ${DB_PASSWORD:?Run scripts/docker.ps1 init first}
+    volumes:
+      - database:/var/lib/mysql
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  masterserver:
+    <<: *backend
+    command: [masterserver]
+    environment:
+      <<: *backend-env
+      DB_PASSWORD: ${DB_PASSWORD:?Run scripts/docker.ps1 init first}
+      CABAL_INITIAL_HP_PERCENT: ${CABAL_INITIAL_HP_PERCENT:-100}
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python3, /app/healthcheck.py, '9001']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  loginserver:
+    <<: *backend
+    command: [loginserver]
+    depends_on:
+      masterserver:
+        condition: service_healthy
+    ports:
+      - '127.0.0.1:38101:38101'
+    healthcheck:
+      test: [CMD, python3, /app/healthcheck.py, '38101']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  gameserver:
+    <<: *backend
+    command: [gameserver]
+    environment:
+      <<: *backend-env
+      CABAL_PUBLIC_IP: ${CABAL_PUBLIC_IP:-127.0.0.1}
+    depends_on:
+      masterserver:
+        condition: service_healthy
+    ports:
+      - '127.0.0.1:38111:38111'
+    healthcheck:
+      test: [CMD, python3, /app/healthcheck.py, '38111']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  localaccount:
+    <<: *backend
+    profiles: [tools]
+    restart: 'no'
+    command: [localaccount, /output/player-credentials.json]
+    environment:
+      DB_PASSWORD: ${DB_PASSWORD:?Run scripts/docker.ps1 init first}
+      CABAL_DB_ADDRESS: database:3306
+    user: '0:0'
+    volumes:
+      - ./.runtime:/output
+    depends_on:
+      database:
+        condition: service_healthy
+
+volumes:
+  database:

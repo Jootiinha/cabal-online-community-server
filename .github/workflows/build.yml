@@ -1,0 +1,19 @@
+name: Build and test Freya
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.2'
+          cache-dependency-path: emulator/go.sum
+      - run: bash scripts/build.sh
+      - run: bash scripts/test.sh
+      - run: git diff --check
+      - run: sudo apt-get update && sudo apt-get install -y mariadb-server mariadb-client
+      - run: sudo service mariadb start
+      - run: sudo env PATH="$PATH" bash scripts/integration-test.sh
