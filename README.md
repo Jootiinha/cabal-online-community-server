@@ -1,14 +1,14 @@
 # Cabal Online Community Server
 
-Backend experimental EP8 em Go e MariaDB, executado com Docker Compose no Docker Desktop do Windows.
+Backend experimental EP8 em Go e MariaDB, executado com Docker Compose.
 
 Para iniciar todos os serviços:
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\Start-Backend.ps1
+```bash
+make start
 ```
 
-Acrescente `-FollowLogs` para acompanhar os logs. Para iniciar também o cliente local, use `powershell -ExecutionPolicy Bypass -File .\scripts\Start-CabalLocal.ps1`.
+Use `make start-logs` para acompanhar os logs. Para iniciar também o cliente local, use `make start-client`; para outra cópia, informe `CLIENT_EXECUTABLE=/caminho/para/CabalMain.exe`.
 
 | Pasta | Responsabilidade |
 | --- | --- |

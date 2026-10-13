@@ -77,7 +77,7 @@ Ambiente de referência: **Windows 11 + WSL2 Ubuntu 24.04** ou Ubuntu 24.04 nati
 
 No WSL, o usuário poderá executar, se necessário:
 
-```powershell
+```bash
 wsl --install -d Ubuntu-24.04
 ```
 

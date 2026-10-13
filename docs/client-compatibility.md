@@ -1,6 +1,6 @@
 # Cliente local EP8
 
-O launcher abre `.client/CabalMain.exe` por padrão; `scripts/Start-CabalLocal.ps1 -ClientExecutable caminho` seleciona outra cópia. O cliente atual tem FileVersion 1.0.0.374. A pasta `.client/` não é versionada.
+Use `make start-client` para iniciar os serviços e abrir `.client/CabalMain.exe`. Para outra cópia, informe `CLIENT_EXECUTABLE=/caminho/para/CabalMain.exe`. O cliente atual tem FileVersion 1.0.0.374. A pasta `.client/` não é versionada.
 
 O endereço de login deve ser `127.0.0.1:38101`. Nesta cópia, a configuração fica em `Data/language/portuguese/language.enc` e usa a chave XOR `92681515`.
 

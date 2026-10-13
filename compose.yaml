@@ -22,8 +22,8 @@ services:
       dockerfile: infra/docker/database.Dockerfile
     restart: unless-stopped
     environment:
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Run scripts/docker.ps1 init first}
-      DB_PASSWORD: ${DB_PASSWORD:?Run scripts/docker.ps1 init first}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Run make init first}
+      DB_PASSWORD: ${DB_PASSWORD:?Run make init first}
     ports:
       - '127.0.0.1:3306:3306'
     volumes:
@@ -41,7 +41,7 @@ services:
     command: [masterserver]
     environment:
       <<: *backend-env
-      DB_PASSWORD: ${DB_PASSWORD:?Run scripts/docker.ps1 init first}
+      DB_PASSWORD: ${DB_PASSWORD:?Run make init first}
       CABAL_INITIAL_HP_PERCENT: ${CABAL_INITIAL_HP_PERCENT:-100}
     depends_on:
       database:
@@ -90,7 +90,7 @@ services:
     restart: 'no'
     command: [localaccount, /output/player-credentials.json]
     environment:
-      DB_PASSWORD: ${DB_PASSWORD:?Run scripts/docker.ps1 init first}
+      DB_PASSWORD: ${DB_PASSWORD:?Run make init first}
       CABAL_DB_ADDRESS: database:3306
     user: '0:0'
     volumes:

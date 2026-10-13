@@ -2,6 +2,27 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 action=${1:-up}
+
+ensure_docker() {
+  if ! command -v docker >/dev/null 2>&1; then
+    if [ -n "${WSL_DISTRO_NAME:-}" ]; then
+      echo 'Docker CLI não encontrado no WSL. Ative a integração desta distribuição em Docker Desktop > Settings > Resources > WSL Integration.' >&2
+    else
+      echo 'Docker CLI não encontrado no PATH.' >&2
+    fi
+    exit 1
+  fi
+  if ! docker info >/dev/null 2>&1; then
+    if [ -n "${WSL_DISTRO_NAME:-}" ]; then
+      echo 'Não foi possível acessar o Docker a partir do WSL. Inicie o Docker Desktop e ative a integração desta distribuição.' >&2
+    else
+      echo 'Não foi possível acessar o daemon Docker. Inicie o Docker e confira as permissões do usuário.' >&2
+    fi
+    exit 1
+  fi
+  docker compose version >/dev/null
+}
+
 init_env() {
   python3 - <<'PY'
 import pathlib, re, secrets
@@ -27,6 +48,9 @@ compose() { docker compose "$@"; }
 db() {
   compose exec -T database sh -c 'MYSQL_PWD="$MARIADB_ROOT_PASSWORD" exec mariadb --skip-ssl -uroot "$@"' -- "$@"
 }
+if [ "$action" != init ]; then
+  ensure_docker
+fi
 case "$action" in
   init) init_env ;;
   build) init_env; compose build ;;

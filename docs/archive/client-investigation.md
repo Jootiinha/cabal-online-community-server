@@ -6,7 +6,7 @@ O usuário confirmou que abre `.client/CabalMain.exe` (FileVersion 1.0.0.374). A
 
 A configuração efetiva está em `.client/Data/language/portuguese/language.enc`, com variante ENC de chave de configuração `92681515` (ordem dos bytes). A decodificação foi validada por tamanho exato, final de stream e estrutura `[Svr]`; o script ganhou `--xor-hex` para preservar a variante. Somente campos de endereço foram alterados para localhost, mantendo as portas e todas as demais configurações. A comparação com o arquivo original e o roundtrip de ambas as variantes passaram. Executáveis e proteções do cliente foram preservados. É necessário fechar e reabrir o jogo para carregar a configuração.
 
-`Start-CabalLocal.ps1` agora abre `.client/CabalMain.exe` por padrão e aceita `-ClientExecutable` para outra cópia. Credenciais foram verificadas no banco Docker sem redefinição da senha. Login completo desta cópia ainda depende de validação após a correção; os serviços CHS em 38121/38125/38122/38123 continuam ausentes no Freya.
+O antigo launcher abria `.client/CabalMain.exe` por padrão e aceitava outro executável. O fluxo atual usa `make start-client`, com `CLIENT_EXECUTABLE=/caminho/para/CabalMain.exe` para outra cópia. Credenciais foram verificadas no banco Docker sem redefinição da senha. Login completo desta cópia ainda depende de validação após a correção; os serviços CHS em 38121/38125/38122/38123 continuam ausentes no Freya.
 
 ## Histórico da outra cópia
 

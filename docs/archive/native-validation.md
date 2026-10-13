@@ -9,7 +9,7 @@ Freya development, fb5bbcce67a448075f1b139ee5d269d26f910043, MIT. Cópia version
 - backend/: código, módulos, schema, scripts, dados e licença upstream. Patches em share/network/network.go, share/rpc/server.go, share/directory/directory.go, cmd/masterserver/rpc/character.go e sql/login.sql (remoção do seed).
 - backend/share/policy/: política e teste do HP inicial.
 - backend/cmd/masterserver/rpc/character_integration_test.go: persistência e rollback em banco descartável.
-- scripts/: pré-requisitos, build, testes, banco, start/stop, smoke, backup, restore-test e wrapper local.ps1.
+- scripts/: pré-requisitos, build, testes, banco, start/stop, smoke, backup e restore-test; o Makefile fornece os atalhos.
 - .env.example, .gitignore, .gitattributes: configuração sem segredos e exclusão dos artefatos.
 - docs/: arquitetura, versões, setup, cliente, alteração, troubleshooting, roadmap e este relatório.
 - .github/workflows/build.yml: build/test e integração MariaDB; não executado no GitHub.
@@ -26,7 +26,7 @@ Freya development, fb5bbcce67a448075f1b139ee5d269d26f910043, MIT. Cópia version
 - bash scripts/start-local.sh / stop-local.sh: iniciados, parados e reiniciados os processos próprios.
 - bash scripts/smoke-test.sh: SELECT nos dois bancos e TCP nas três portas passaram; listeners dos serviços e MariaDB em 127.0.0.1.
 - bash scripts/backup.sh / restore-test.sh: dump gerado e restaurado em bancos isolados, tabelas/contagens iguais; bancos reais vazios nesta validação.
-- scripts/local.ps1 check-prerequisites/smoke-test: executados no PowerShell, passaram.
+- make check-prerequisites/smoke-test: executados, passaram.
 - git diff --check: passou (arquivos novos ainda não estão no índice; revisão adicional de whitespace executada separadamente).
 
 ## Marcos

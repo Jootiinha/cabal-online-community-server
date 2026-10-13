@@ -6,4 +6,4 @@ Política pura em share/policy/initial_hp.go: porcentagem 1..1000; base 1..65535
 
 CreateCharacter usa uma transação para personagem, equipamento, inventário, habilidades, atalhos e metadata; falhas retornam erro com rollback. Teste de integração chama o handler real em banco descartável, verifica HP 50/100 e itens persistidos, configuração inválida e falha forçada no inventário após inserir personagem. Não usa cliente nem valida protocolo de rede.
 
-Edite .env e execute `powershell -ExecutionPolicy Bypass -File scripts/docker.ps1 up` para reconstruir e atualizar os serviços. Para rollback da regra: CABAL_INITIAL_HP_PERCENT=100 e reinicie. Isso preserva dados existentes; não desfaz HP de personagens já criados. Testes: ações test e integration-test.
+Edite .env e execute `make up` para reconstruir e atualizar os serviços. Para rollback da regra: CABAL_INITIAL_HP_PERCENT=100 e reinicie. Isso preserva dados existentes; não desfaz HP de personagens já criados. Testes: `make test` e `sudo make integration-test`.
