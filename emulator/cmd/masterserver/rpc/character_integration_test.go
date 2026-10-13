@@ -40,6 +40,16 @@ func TestCreateCharacterPersistence(t *testing.T) {
 			t.Fatal(err)
 		}
 		var hp int
+		var persisted character.Character
+		if err := db.Get(&persisted, "SELECT level, sword_rank, magic_rank FROM characters WHERE id=?", req.Id); err != nil {
+			t.Fatal(err)
+		}
+		if res.Character.Level != 1 || res.Character.Level != persisted.Level ||
+			res.Character.SwordRank != persisted.SwordRank || res.Character.MagicRank != persisted.MagicRank ||
+			res.Character.Style.MasteryLevel != 1 {
+			t.Fatalf("new character defaults differ from persisted values: level=%d sword=%d magic=%d mastery=%d",
+				res.Character.Level, res.Character.SwordRank, res.Character.MagicRank, res.Character.Style.MasteryLevel)
+		}
 		if err := db.Get(&hp, "SELECT max_hp FROM characters WHERE id=?", req.Id); err != nil {
 			t.Fatal(err)
 		}

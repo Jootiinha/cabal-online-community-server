@@ -28,9 +28,9 @@ docker --context desktop-linux compose logs -f --tail=100
 docker --context desktop-linux compose logs -f gameserver
 ```
 
-MariaDB e RPC ficam na rede interna. As portas do cliente são publicadas em localhost: 38101 e 38111. O volume `cabal-local_database` persiste os dados; `down` preserva o volume. `down -v` apaga os dados.
+MariaDB é publicado apenas em localhost: 3306; RPC fica na rede interna. As portas do cliente são publicadas em localhost: 38101 e 38111. O volume `cabal-local_database` persiste os dados; `down` preserva o volume. `down -v` apaga os dados.
 
-O banco local usa `--skip-ssl` na rede privada do Compose para evitar falhas de certificados automáticos causadas por diferenças de relógio na VM do Desktop; a porta do banco não é publicada.
+O banco local usa `--skip-ssl` para evitar falhas de certificados automáticos causadas por diferenças de relógio na VM do Desktop. No DataGrip, crie uma fonte MariaDB com host `127.0.0.1`, porta `3306`, usuário `cabal_local` e a senha `DB_PASSWORD` do `.env`. Deixe SSL desativado e selecione os schemas `cabal_login` e `cabal_world`. Após alterar a publicação da porta, aplique com `docker --context desktop-linux compose up -d --no-deps database`.
 
 ## Transferência do Engine WSL para Desktop
 

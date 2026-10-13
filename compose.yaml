@@ -24,6 +24,8 @@ services:
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Run scripts/docker.ps1 init first}
       DB_PASSWORD: ${DB_PASSWORD:?Run scripts/docker.ps1 init first}
+    ports:
+      - '127.0.0.1:3306:3306'
     volumes:
       - database:/var/lib/mysql
     healthcheck:

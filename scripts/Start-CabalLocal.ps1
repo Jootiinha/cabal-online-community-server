@@ -3,12 +3,15 @@
 #   powershell -ExecutionPolicy Bypass -File .\scripts\Start-CabalLocal.ps1
 [CmdletBinding()]
 param(
-    [switch]$NoClient
+    [switch]$NoClient,
+    [string]$ClientExecutable
 )
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path $PSScriptRoot -Parent
-$clientExecutable = 'C:\dev\cabal-online-community-server\.client\TGCabalEP8\cabalmain.exe'
+if (-not $ClientExecutable) {
+    $ClientExecutable = Join-Path $repoRoot '.client\CabalMain.exe'
+}
 $credentials = Join-Path $repoRoot '.runtime\player-credentials.json'
 
 function Invoke-ProjectAction([string]$action) {

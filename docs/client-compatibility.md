@@ -1,5 +1,15 @@
 # Gate do cliente
 
+## Cliente ativo em `.client` — correção de endereço em 12/10/2026
+
+O usuário confirmou que abre `.client/CabalMain.exe` (FileVersion 1.0.0.374). A observação TCP do processo mostrou tentativa de acesso a `192.168.0.20:38101` em SynSent; o Windows desta máquina usa `192.168.5.142`, e o Docker publica login em `127.0.0.1:38101`. Essa cópia é diferente da TGCabalEP8 descrita abaixo.
+
+A configuração efetiva está em `.client/Data/language/portuguese/language.enc`, com variante ENC de chave de configuração `92681515` (ordem dos bytes). A decodificação foi validada por tamanho exato, final de stream e estrutura `[Svr]`; o script ganhou `--xor-hex` para preservar a variante. Somente campos de endereço foram alterados para localhost, mantendo as portas e todas as demais configurações. A comparação com o arquivo original e o roundtrip de ambas as variantes passaram. Executáveis e proteções do cliente foram preservados. É necessário fechar e reabrir o jogo para carregar a configuração.
+
+`Start-CabalLocal.ps1` agora abre `.client/CabalMain.exe` por padrão e aceita `-ClientExecutable` para outra cópia. Credenciais foram verificadas no banco Docker sem redefinição da senha. Login completo desta cópia ainda depende de validação após a correção; os serviços CHS em 38121/38125/38122/38123 continuam ausentes no Freya.
+
+## Histórico da outra cópia
+
 README upstream declara suporte EP8. cfg/loginserver.ini contém client_version=1422, magic_key=709182467 e ignore_client_version=1. Isso não comprova compatibilidade de qualquer distribuição EP8; EP33 não foi validado. Esses campos foram preservados, sem implementação de contorno de proteção.
 
 Cliente local informado posteriormente pelo usuário em C:\Users\joaoc\Downloads\TGCabalEP8\TGCabalEP8, com autorização declarada para configuração local. cabalmain.exe tem FileVersion 1.0.0.369, ProductVersion 1.0.0.9000, assinatura Authenticode válida ESTsoft, SHA256 12D56A37C78424B6202D04FAF3B9BB82B2B25FD680D238F4418FE773F4A60558. Isso não confirma sua build de protocolo.

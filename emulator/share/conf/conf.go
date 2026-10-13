@@ -127,6 +127,10 @@ func get(section string, key string) (string, error) {
 		return "", errors.New("Cannot find " + section + "::" + key)
 	}
 
-	log.Debugf("%s::%s=%s", section, key, data[key])
+	loggedValue := data[key]
+	if strings.EqualFold(key, "password") {
+		loggedValue = "******"
+	}
+	log.Debugf("%s::%s=%s", section, key, loggedValue)
 	return data[key], nil
 }

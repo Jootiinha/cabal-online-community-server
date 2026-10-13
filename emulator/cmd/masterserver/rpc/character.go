@@ -152,6 +152,12 @@ func CreateCharacter(_ *rpc.Client, r *character.CreateReq, s *character.CreateR
 		return err
 	}
 	// set data
+	// Match the database defaults in the character returned to the game server.
+	// This character is cached and can enter the world before being read back.
+	c.Level = 1
+	c.SwordRank = 1
+	c.MagicRank = 1
+	c.Style.MasteryLevel = 1
 	c.World = byte(l["world"])
 	c.X = byte(l["x"])
 	c.Y = byte(l["y"])

@@ -13,24 +13,24 @@ import zlib
 
 KEY = bytes.fromhex('92656757')
 
-def unpack(raw):
+def unpack(raw, key=KEY):
     size = struct.unpack('<I', raw[:4])[0]
     if not 1 <= size <= 1024 * 1024:
         raise ValueError('Unexpected configuration size')
     compressed = bytearray(raw[4:])
     for i in range(4):
-        compressed[i] ^= KEY[i]
+        compressed[i] ^= key[i]
     inflater = zlib.decompressobj(-15)
     plain = inflater.decompress(compressed, size + 1)
     if len(plain) != size or not inflater.eof or inflater.unused_data:
         raise ValueError('Invalid ENC size or stream')
     return plain
 
-def pack(plain):
+def pack(plain, key=KEY):
     compressor = zlib.compressobj(9, zlib.DEFLATED, -15)
     compressed = bytearray(compressor.compress(plain) + compressor.flush())
     for i in range(4):
-        compressed[i] ^= KEY[i]
+        compressed[i] ^= key[i]
     return struct.pack('<I', len(plain)) + compressed
 
 def main():
@@ -42,13 +42,17 @@ def main():
         help='relative configuration path; defaults to Data/language.enc',
     )
     parser.add_argument('--apply', action='store_true')
+    parser.add_argument('--xor-hex', default=KEY.hex(), help='four-byte ENC configuration key in hex')
     args = parser.parse_args()
+    key = bytes.fromhex(args.xor_hex)
+    if len(key) != 4:
+        parser.error('--xor-hex must contain exactly four bytes')
     path = args.client / (args.config or pathlib.Path('Data/language.enc'))
     if not path.is_file():
         raise FileNotFoundError(path)
     raw = path.read_bytes()
-    plain = unpack(raw)
-    if unpack(pack(plain)) != plain:
+    plain = unpack(raw, key)
+    if unpack(pack(plain, key), key) != plain:
         raise ValueError('Configuration roundtrip failed')
     print(plain.decode('latin1'))
     if args.apply:
@@ -61,8 +65,8 @@ def main():
         if updated == plain:
             print('Already configured for localhost')
             return
-        packed = pack(updated)
-        if unpack(packed) != updated:
+        packed = pack(updated, key)
+        if unpack(packed, key) != updated:
             raise ValueError('Updated configuration verification failed')
         backup = path.with_name('language.enc.local-backup')
         if not backup.exists():
