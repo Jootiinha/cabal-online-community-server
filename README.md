@@ -1,11 +1,25 @@
-# Cabal Online local no Windows
+# Cabal Online Community Server
 
-Workspace Freya EP8 (MIT), Go + MariaDB, executado em Docker Compose no Docker Desktop do Windows (contexto `desktop-linux`). MariaDB, MasterServer, LoginServer e GameServer têm containers separados. Servidor experimental: processos ativos não significam jogo completo/jogável.
+Backend experimental EP8 em Go e MariaDB, executado com Docker Compose no Docker Desktop do Windows.
 
-Para iniciar MariaDB, serviços, verificações e o cliente em um comando: `powershell -ExecutionPolicy Bypass -File .\scripts\Start-CabalLocal.ps1`. Use `-NoClient` para subir somente os serviços.
+Para iniciar todos os serviços:
 
-Para iniciar todo o backend com Docker Compose: `powershell -NoProfile -ExecutionPolicy Bypass -File .\Start-Backend.ps1`. Acrescente `-FollowLogs` para acompanhar os logs em tempo real.
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\Start-Backend.ps1
+```
 
-Leia [setup Docker](docs/docker.md) para instalação, migração, backup e comandos PowerShell, [relatório](docs/validation.md) para evidências anteriores e [compatibilidade](docs/client-compatibility.md) para o cliente externo necessário. O [setup local](docs/setup-local.md) descreve a execução nativa anterior.
+Acrescente `-FollowLogs` para acompanhar os logs. Para iniciar também o cliente local, use `powershell -ExecutionPolicy Bypass -File .\scripts\Start-CabalLocal.ps1`.
 
-Código em emulator/; scripts idempotentes em scripts/; logs, bancos de teste e credenciais ficam fora do Git. Primeira alteração: [HP inicial de novos personagens](docs/first-customization.md). Licença e versão upstream em [versions](docs/versions.md); arquitetura e pendências em docs/architecture.md e docs/roadmap.md.
+| Pasta | Responsabilidade |
+| --- | --- |
+| `backend/` | Código Go, configurações, schemas, dados e scripts Lua |
+| `infra/docker/` | Imagem do banco, inicialização, entrypoint e healthchecks |
+| `scripts/` | Operação, build, testes e configuração do cliente |
+| `docs/` | Guias de manutenção e execução |
+| `docs/archive/` | Plano inicial e relatórios históricos |
+| `.runtime/` | Credenciais, logs e arquivos locais ignorados pelo Git |
+| `.client/` | Cliente local externo, ignorado pelo Git |
+
+O `Dockerfile` e o `compose.yaml` ficam na raiz para permitir os comandos padrão do Docker Compose. O volume `cabal-local_database` persiste contas e personagens.
+
+Consulte [Docker e logs](docs/docker.md), [arquitetura](docs/architecture.md), [cliente](docs/client-compatibility.md), [personalização de HP](docs/first-customization.md) e [pendências](docs/roadmap.md). A origem e as licenças dos componentes estão em [atribuições](docs/THIRD_PARTY_NOTICES.md).

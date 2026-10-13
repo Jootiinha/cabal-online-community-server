@@ -1,0 +1,215 @@
+package packet
+
+import (
+	"cabal-online-community-server/cmd/gameserver/context"
+	"cabal-online-community-server/share/log"
+	"cabal-online-community-server/share/models/inventory"
+	"cabal-online-community-server/share/network"
+)
+
+func StackItem(dst *inventory.Item, src context.ItemHandler) bool {
+	// should not be stacked: no items with this kind index
+	if dst.Kind == 0 {
+		return false
+	}
+
+	// should not be stacked: item kinds are different
+	if dst.Kind != src.GetKind() {
+		return false
+	}
+
+	// todo: check stackable option
+	// todo: check quest items
+
+	amount := src.GetOption()
+	total := dst.Option + amount
+
+	// todo: check total amount based on item type
+
+	dst.Option = total
+
+	return true
+}
+
+func ItemLooting(session *network.Session, reader *network.Reader) {
+	id := reader.ReadInt32()
+	key := reader.ReadUint16()
+	_ = reader.ReadUint32() // kind idx
+	slot := reader.ReadUint16()
+
+	const (
+		statusOk = 0x60 + iota
+		statusOwnerFail
+		statusAfterImage
+		statusAlreadyUseSlot
+		statusAntiOnlineGame
+		statusOutOfRange
+	)
+
+	ctx, err := context.Parse(session)
+	if err != nil {
+		log.Error(err.Error())
+		return
+	}
+
+	ctx.Mutex.RLock()
+	charId := ctx.Char.Id
+	world := ctx.World
+	x, y := ctx.Char.X, ctx.Char.Y
+	ctx.Mutex.RUnlock()
+
+	currentItem := ctx.Char.Inventory.Get(slot)
+
+	if world == nil {
+		log.Error("Unable to get current world!")
+		return
+	}
+
+	item := world.PeekItem(id, key)
+	if item == nil {
+		// such item does not exist
+		return
+	}
+
+	// check looting position
+	itemX, itemY := item.GetPosition()
+	distX, distY := int(x)-int(itemX), int(y)-int(itemY)
+	if distX < -10 || distX > 10 || distY < -10 || distY > 10 {
+		pkt := network.NewWriter(ITEMLOOTING)
+		pkt.WriteByte(statusOutOfRange)
+		pkt.WriteUint32(0)
+		pkt.WriteInt32(0)
+		pkt.WriteUint16(0)
+		pkt.WriteUint32(0)
+		session.Send(pkt)
+		return
+	}
+
+	// owner pick-up duration was not expired yet
+	if !item.IsOwnerExpired() && item.GetOwner() != charId {
+		pkt := network.NewWriter(ITEMLOOTING)
+		pkt.WriteByte(statusOwnerFail)
+		pkt.WriteUint32(0)
+		pkt.WriteInt32(0)
+		pkt.WriteUint16(0)
+		pkt.WriteUint32(0)
+		session.Send(pkt)
+		return
+	}
+
+	// check inventory slot is already in use
+	// also check if it should be stacked
+	isStacked := StackItem(&currentItem, item)
+	if !isStacked && currentItem.Kind != 0 {
+		pkt := network.NewWriter(ITEMLOOTING)
+		pkt.WriteByte(statusAlreadyUseSlot)
+		pkt.WriteUint32(0)
+		pkt.WriteInt32(0)
+		pkt.WriteUint16(0)
+		pkt.WriteUint32(0)
+		session.Send(pkt)
+		return
+	}
+
+	invItem := world.PickItem(id)
+	if invItem == nil {
+		// such item does not exist
+		return
+	}
+
+	// update slot
+	invItem.Slot = slot
+
+	if isStacked {
+		invItem.Option = currentItem.Option
+	}
+
+	state, err := false, nil
+
+	if isStacked {
+		state, err = ctx.Char.Inventory.Stack(slot, currentItem.Option)
+	} else {
+		state, err = ctx.Char.Inventory.Set(slot, *invItem)
+	}
+
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	pkt := network.NewWriter(ITEMLOOTING)
+
+	if state {
+		pkt.WriteByte(statusOk)
+	} else {
+		pkt.WriteByte(statusOwnerFail)
+	}
+
+	pkt.WriteUint32(invItem.Kind)
+	pkt.WriteInt32(invItem.Option)
+	pkt.WriteUint16(slot)
+	pkt.WriteUint32(invItem.Expire)
+
+	session.Send(pkt)
+}
+
+func NewItemSingle(item context.ItemHandler, dropped bool) *network.Writer {
+	pkt := network.NewWriter(NFY_NEWITEMLIST)
+	pkt.WriteByte(1)
+
+	pkt.WriteInt32(item.GetId())
+	pkt.WriteInt32(item.GetOption())
+
+	// we need to send owner id for the first time, because game client will
+	// show "drop" animation
+	// however, if we would send owner id everytime - the same drop animation
+	// would appear in-game, and to not have this, id of -1 is sent instead
+	if dropped {
+		pkt.WriteInt32(item.GetOwner())
+	} else {
+		pkt.WriteInt32(-1)
+	}
+
+	pkt.WriteUint32(item.GetKind())
+
+	x, y := item.GetPosition()
+	pkt.WriteUint16(x)
+	pkt.WriteUint16(y)
+	pkt.WriteUint16(item.GetKey())
+	pkt.WriteByte(0x02) // type
+	pkt.WriteByte(0x06) // unk
+
+	return pkt
+}
+
+func NewItemList(items []context.ItemHandler) *network.Writer {
+	count := len(items)
+
+	pkt := network.NewWriter(NFY_NEWITEMLIST)
+	pkt.WriteByte(count)
+
+	for _, i := range items {
+		pkt.WriteInt32(i.GetId())
+		pkt.WriteInt32(i.GetOption())
+		pkt.WriteInt32(0xFFFFFFFF) // owner id, see NewItemSingle
+		pkt.WriteUint32(i.GetKind())
+
+		x, y := i.GetPosition()
+		pkt.WriteUint16(x)
+		pkt.WriteUint16(y)
+		pkt.WriteUint16(i.GetKey())
+		pkt.WriteByte(0x02) // type
+		pkt.WriteByte(0x06) // unk
+
+	}
+
+	return pkt
+}
+
+func DelItemList(id int32, reason byte) *network.Writer {
+
+	pkt := network.NewWriter(NFY_DELITEMLIST)
+	pkt.WriteInt32(id)
+	pkt.WriteByte(reason)
+
+	return pkt
+}

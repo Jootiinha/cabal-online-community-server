@@ -1,7 +1,13 @@
-# Arquitetura local
+# Arquitetura e manutenção
 
-Integração por cópia versionada em `emulator/`, licença MIT preservada. A raiz estava vazia, exceto o guia não rastreado; branch main e origin existentes foram preservados. Não há fork remoto próprio para manter patches em um submódulo; a cópia permite revisar e modificar o código no mesmo repositório. Nenhum commit ou push realizado.
+O módulo Go em `backend/` contém quatro executáveis em `cmd/`: `masterserver` acessa os bancos e atende RPC; `loginserver` autentica e apresenta os servidores; `gameserver` gerencia personagens e mapas; `localaccount` provisiona a conta de desenvolvimento. `share/` reúne os componentes compartilhados. Imports internos usam `cabal-online-community-server`.
 
-Windows executa os comandos PowerShell e o cliente; Docker Desktop do Windows executa Docker Compose no contexto desktop-linux. MariaDB, MasterServer, LoginServer e GameServer têm containers separados. MasterServer conecta `database:3306` e atende RPC na rede interna em 9001. LoginServer atende 38101; GameServer 1/1 atende 38111. Ambos conectam `masterserver:9001`. Somente portas do cliente são publicadas no localhost do host. Os listeners usam `CABAL_BIND_IP=0.0.0.0` nos containers e localhost por padrão na execução nativa. Configurações, dados e scripts ficam relativos à pasta pai de bin. O volume Docker persiste o banco; `.runtime` mantém backups, credenciais do jogador e artefatos nativos preservados para rollback. Veja [Docker](docker.md).
+Docker Desktop executa os serviços no contexto `desktop-linux`. MasterServer conecta `database:3306` e atende RPC interno em 9001. LoginServer e GameServer conectam `masterserver:9001`. As portas publicadas em localhost são 3306, 38101 e 38111. O volume `cabal-local_database` guarda os dados dos jogadores.
 
-Patches: listeners localhost, resolução de diretório portátil, política de HP inicial e criação transacional de personagem. Os demais fluxos upstream ainda precisam de revisão antes de qualquer uso fora do desenvolvimento local.
+`backend/cfg/` contém os modelos de configuração. `infra/docker/entrypoint.py` gera os arquivos em `/app/cfg` a partir do ambiente. Os dados do jogo ficam em `backend/data/`, eventos Lua em `backend/script/` e schemas em `backend/sql/`. No container, esses caminhos são copiados para `/app`, mantendo a resolução de arquivos relativa a `bin/`.
+
+Execute os wrappers em `scripts/` a partir da raiz. `Start-Backend.ps1` inicia o Compose e verifica a saúde dos serviços. `scripts/docker.ps1 test` executa os testes Go no builder. Os testes SQL de criação de personagem usam `scripts/integration-test.sh` com banco descartável no WSL; o script exige MariaDB nativo ativo e Go instalado. Os scripts nativos são mantidos para desenvolvimento e migração, conforme [setup nativo](setup-local.md).
+
+Ao alterar caminhos, revise `Dockerfile`, `compose.yaml`, `.dockerignore`, scripts e CI. Ao alterar dados iniciais de personagens, mantenha os valores retornados pelo RPC consistentes com os defaults SQL: a primeira entrada no mapa usa o personagem em memória. Os testes de integração verificam essa consistência.
+
+Documentos históricos ficam em `archive/`; instruções atuais ficam diretamente em `docs/`. A licença e a origem dos componentes estão em [atribuições](THIRD_PARTY_NOTICES.md).

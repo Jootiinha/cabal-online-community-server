@@ -19,7 +19,7 @@ services:
     command: ["--skip-ssl"]
     build:
       context: .
-      dockerfile: docker/database.Dockerfile
+      dockerfile: infra/docker/database.Dockerfile
     restart: unless-stopped
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Run scripts/docker.ps1 init first}

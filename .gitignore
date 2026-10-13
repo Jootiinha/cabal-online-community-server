@@ -1,8 +1,8 @@
 .upstream-freya/
 .env
 .runtime/
-emulator/bin/
-emulator/log/
+backend/bin/
+backend/log/
 *.exe
 .client/
 __pycache__/

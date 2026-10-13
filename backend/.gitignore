@@ -1,0 +1,13 @@
+## Ignore Gogland IDE project settings
+.idea/
+
+## Ignore VSCode project settings
+.vscode/
+
+## Ignore Binaries, logs...
+bin/*
+log/*
+pkg/*
+
+## Ignore macOS FS files
+.DS_Store

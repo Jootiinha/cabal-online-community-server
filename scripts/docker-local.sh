@@ -15,8 +15,8 @@ for key in ('DB_PASSWORD', 'DB_ROOT_PASSWORD'):
             text = re.sub(r'^' + key + r'=.*$', key + '=' + value, text, flags=re.M)
         else:
             text = text.rstrip('\n') + '\n' + key + '=' + value + '\n'
-    elif not re.fullmatch(r'[A-Za-z0-9]{24,128}', values[key]):
-        raise SystemExit(key + ': use 24..128 alphanumeric characters')
+    elif not re.fullmatch(r'[A-Za-z0-9@#]{12,128}', values[key]):
+        raise SystemExit(key + ': use 12..128 characters: letters, digits, @ or #')
 path.write_text(text.lstrip('\n'))
 path.chmod(0o600)
 pathlib.Path('.runtime').mkdir(exist_ok=True)
@@ -81,7 +81,7 @@ PY
   test)
     compose build
     docker build --target build -t cabal-builder:local .
-    docker run --rm -v "$PWD/emulator:/src" -w /src cabal-builder:local go test ./...
+    docker run --rm -v "$PWD/backend:/src" -w /src cabal-builder:local go test ./...
     ;;
   *) echo "Unknown action: $action" >&2; exit 1 ;;
 esac

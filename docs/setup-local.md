@@ -15,8 +15,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\local.ps1 start-local
 powershell -ExecutionPolicy Bypass -File .\scripts\local.ps1 smoke-test
 ```
 
-`db-init` gera .env com senha aleatória, bancos cabal_login/cabal_world e usuário cabal_local limitado a SELECT/INSERT/UPDATE/DELETE. Não importa a conta de exemplo upstream. Importa somente bancos vazios; tabelas existentes não são sobrescritas. Se uma importação falhar, investigar schema parcial antes de repetir. Não é um mecanismo de migrations.
+`db-init` gera .env com senha aleatória, bancos cabal_login/cabal_world e usuário cabal_local limitado a SELECT/INSERT/UPDATE/DELETE. Não importa a conta de exemplo de referência. Importa somente bancos vazios; tabelas existentes não são sobrescritas. Se uma importação falhar, investigar schema parcial antes de repetir. Não é um mecanismo de migrations.
 
 Para parar: `powershell -ExecutionPolicy Bypass -File .\scripts\local.ps1 stop-local`. MariaDB permanece disponível; pare com `wsl -d Ubuntu-24.04 -u root -- service mariadb stop` se necessário.
 
-Para backup: ação `backup`, arquivos em .runtime/backups. Não edite credenciais em emulator/cfg; configuração efetiva em .runtime. Proteja .env e .runtime com ACL da sua conta Windows: permissões Linux não restringem automaticamente arquivos no NTFS montado. Nenhuma conta de jogador é criada automaticamente.
+Para backup: ação `backup`, arquivos em .runtime/backups. Não edite credenciais em backend/cfg; configuração efetiva em .runtime. Proteja .env e .runtime com ACL da sua conta Windows: permissões Linux não restringem automaticamente arquivos no NTFS montado. Nenhuma conta de jogador é criada automaticamente.

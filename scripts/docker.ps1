@@ -26,7 +26,7 @@ function Initialize-Environment {
     foreach ($key in @('DB_PASSWORD','DB_ROOT_PASSWORD')) {
         $match = [regex]::Match($text, "(?m)^$key=([^\r\n]*)")
         if ($match.Success -and $match.Groups[1].Value) {
-            if ($match.Groups[1].Value -notmatch '^[A-Za-z0-9]{24,128}$') { throw "$key deve conter 24..128 caracteres alfanumericos." }
+            if ($match.Groups[1].Value -notmatch '^[A-Za-z0-9@#]{12,128}$') { throw "$key deve conter 12..128 caracteres: letras, numeros, @ ou #." }
             continue
         }
         $bytes = New-Object byte[] 24
@@ -90,7 +90,7 @@ try {
         'test' {
             & $docker --context desktop-linux build --target build -t cabal-builder:local $repo
             if ($LASTEXITCODE -ne 0) { throw 'Falha ao construir builder.' }
-            & $docker --context desktop-linux run --rm -v "${repo}\emulator:/src" -w /src cabal-builder:local go test ./...
+            & $docker --context desktop-linux run --rm -v "${repo}\backend:/src" -w /src cabal-builder:local go test ./...
             if ($LASTEXITCODE -ne 0) { throw 'Falha nos testes Go.' }
         }
     }
